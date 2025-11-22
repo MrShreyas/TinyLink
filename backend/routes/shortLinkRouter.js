@@ -1,6 +1,6 @@
 const express = require('express');
 const { customAlphabet } = require('nanoid');
-const linkQueries = require('../db/linkQueries');
+const linkQueries = require('../Db/linkQueries');
 
 const router = express.Router();
 

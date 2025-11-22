@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const queries = require('../db/queries');
+const queries = require('../Db/queries');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'change_this_secret';
 

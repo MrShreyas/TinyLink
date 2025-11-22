@@ -9,8 +9,8 @@ var cors = require('cors');
 require('dotenv').config();
 const geoip = require('geoip-lite');
 
-var linkQueries = require('./db/linkQueries');
-var analyticsQueries = require('./db/analyticsQueries');
+var linkQueries = require('./Db/linkQueries');
+var analyticsQueries = require('./Db/analyticsQueries');
 var verifyAuth = require('./middleware/verifyAuth');
 
 var app = express();

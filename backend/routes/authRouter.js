@@ -5,7 +5,7 @@ const bcrypt = require('bcryptjs');
 const router = express.Router();
 
 // Use DB-backed users via queries
-const queries = require('../db/queries');
+const queries = require('../Db/queries');
 const JWT_SECRET = process.env.JWT_SECRET || 'change_this_secret';
 
 // test DB on load (non-blocking)
