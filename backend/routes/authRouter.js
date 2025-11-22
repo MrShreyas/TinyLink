@@ -48,8 +48,8 @@ router.post('/login', async (req, res) => {
     // Include `path` so clearing the cookie works reliably, and set a reasonable maxAge.
     res.cookie('auth_token', token, {
       httpOnly: true,
-      sameSite: 'None',
-      // secure: true,
+      sameSite: 'none',
+      secure: true,
       path: '/',
       maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
     });
