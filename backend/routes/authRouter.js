@@ -45,7 +45,7 @@ router.post('/login', async (req, res) => {
     const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: '7d' });
 
     // Set cookie; httpOnly for security. In production set `secure: true` when using HTTPS.
-    res.cookie('auth_token', token, { httpOnly: true, sameSite: 'lax' });
+    res.cookie('auth_token', token, { httpOnly: true, sameSite: 'none', secure: true });
     req.userId = user.id;
 
     const safe = {

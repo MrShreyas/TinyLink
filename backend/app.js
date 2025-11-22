@@ -20,7 +20,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 // Enable CORS for the frontend app and allow credentials (cookies)
-app.use(cors({ origin: 'http://localhost:3000', credentials: true }));
+app.use(cors({ origin: ['http://localhost:3000','https://tiny-link-eight-eta.vercel.app/'], credentials: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/:shortcode', async function(req, res, next) {
