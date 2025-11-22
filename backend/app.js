@@ -15,12 +15,34 @@ var verifyAuth = require('./middleware/verifyAuth');
 
 var app = express();
 
+// If running behind a proxy (Render, Vercel proxies), trust the first proxy
+// so secure cookies and `req.ip` behave correctly.
+app.set('trust proxy', 1);
+
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 // Enable CORS for the frontend app and allow credentials (cookies)
-app.use(cors({ origin: ['http://localhost:3000','https://tiny-link-eight-eta.vercel.app'], credentials: true }));
+// Configure CORS: allow credentials and only allow known origins.
+const ALLOWED_ORIGINS = [
+  'http://localhost:3000',
+  'https://tiny-link-eight-eta.vercel.app'
+];
+app.use(cors({
+  origin: function(origin, callback) {
+    // allow requests with no origin (like mobile apps, curl, or server-to-server)
+    if (!origin) return callback(null, true);
+    if (ALLOWED_ORIGINS.indexOf(origin) !== -1) {
+      return callback(null, true);
+    }
+    return callback(new Error('CORS policy: Origin not allowed'));
+  },
+  credentials: true,
+  optionsSuccessStatus: 200
+}));
+// Ensure preflight requests are handled
+app.options('*', cors({ origin: ALLOWED_ORIGINS, credentials: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/:shortcode', async function(req, res, next) {

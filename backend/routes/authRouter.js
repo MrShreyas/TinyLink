@@ -44,8 +44,15 @@ router.post('/login', async (req, res) => {
 
     const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: '7d' });
 
-    // Set cookie; httpOnly for security. In production set `secure: true` when using HTTPS.
-    res.cookie('auth_token', token, { httpOnly: true, sameSite: 'none', secure: true });
+    // Set cookie; explicit options for cross-site usage. `sameSite:'none'` requires `secure: true`.
+    // Include `path` so clearing the cookie works reliably, and set a reasonable maxAge.
+    res.cookie('auth_token', token, {
+      httpOnly: true,
+      sameSite: 'none',
+      secure: true,
+      path: '/',
+      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+    });
     req.userId = user.id;
 
     const safe = {
@@ -64,7 +71,8 @@ router.post('/login', async (req, res) => {
 
 // Logout: clears auth_token cookie
 router.post('/logout', (req, res, next) => {
-  res.clearCookie('auth_token');
+  // Clear cookie using same options to ensure browser removes it
+  res.clearCookie('auth_token', { path: '/', httpOnly: true, sameSite: 'none', secure: true });
   res.json({ message: 'Logged out' });
 });
 
