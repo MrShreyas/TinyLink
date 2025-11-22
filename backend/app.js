@@ -29,22 +29,21 @@ const ALLOWED_ORIGINS = [
   'http://localhost:3000',
   'https://tiny-link-eight-eta.vercel.app'
 ];
-app.use(cors({
-  origin: function(origin, callback) {
-    // allow requests with no origin (like mobile apps, curl, or server-to-server)
+const corsOptions = {
+  origin: function (origin, callback) {
     if (!origin) return callback(null, true);
-    if (ALLOWED_ORIGINS.indexOf(origin) !== -1) {
+    if (ALLOWED_ORIGINS.includes(origin)) {
       return callback(null, true);
     }
-    return callback(new Error('CORS policy: Origin not allowed'));
+    return callback(new Error("CORS policy: Origin not allowed"));
   },
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization' ],
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization", "Cookie"],
   credentials: true,
-  optionsSuccessStatus: 200
-}));
-// Ensure preflight requests are handled
-app.options('*', cors({ origin: ALLOWED_ORIGINS, credentials: true }));
+  optionsSuccessStatus: 200,
+};
+
+app.use(cors(corsOptions));
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/:shortcode', async function(req, res, next) {

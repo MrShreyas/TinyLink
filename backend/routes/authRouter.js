@@ -48,8 +48,8 @@ router.post('/login', async (req, res) => {
     // Include `path` so clearing the cookie works reliably, and set a reasonable maxAge.
     res.cookie('auth_token', token, {
       httpOnly: true,
-      sameSite: 'none',
-      secure: true,
+      sameSite: 'None',
+      // secure: true,
       path: '/',
       maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
     });
@@ -65,7 +65,7 @@ router.post('/login', async (req, res) => {
     };
     res.json({ user: safe });
   } catch (err) {
-    console.log('Login error', JSON.stringify(err));
+    console.log('Login error', err);
     res.status(500).json({ error: 'Server error' });
   }
 });
