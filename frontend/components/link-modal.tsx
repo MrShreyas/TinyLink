@@ -10,8 +10,9 @@ import { Card } from "@/components/ui/card"
 export function LinkModal({
   onClose,
   onSubmit,
-}: { onClose: () => void; onSubmit: (longUrl: string) => void }) {
+}: { onClose: () => void; onSubmit: (longUrl: string, customCode?: string) => void }) {
   const [longUrl, setLongUrl] = useState("")
+  const [customCode, setCustomCode] = useState("")
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
 
@@ -33,7 +34,7 @@ export function LinkModal({
 
     setLoading(true)
     setTimeout(() => {
-      onSubmit(longUrl)
+      onSubmit(longUrl, customCode && customCode.trim() ? customCode.trim() : undefined)
       setLoading(false)
     }, 500)
   }
@@ -56,6 +57,17 @@ export function LinkModal({
               value={longUrl}
               onChange={(e) => setLongUrl(e.target.value)}
             />
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-foreground">Custom short code (optional)</label>
+            <Input
+              type="text"
+              placeholder="e.g. my-code or custom123"
+              value={customCode}
+              onChange={(e) => setCustomCode(e.target.value)}
+            />
+            <p className="text-xs text-foreground/70">Only letters, numbers, hyphen and underscore allowed. 3-20 characters.</p>
           </div>
 
           <div className="flex gap-2 pt-4">

@@ -3,6 +3,7 @@ import api from '../lib/axios'
 type CreateLinkPayload = {
   longUrl: string
   userId?: string | number | null
+  customCode?: string
 }
 
 type LinkMetadata = {
@@ -89,6 +90,16 @@ const LinkServices = {
     return []
   },
 
+  // DELETE /short/:shortcode -> delete a short link
+  deleteLink: async (shortcode: string): Promise<boolean> => {
+    try {
+      await api.delete(`/short/${encodeURIComponent(shortcode)}`)
+      return true
+    } catch (err) {
+      // forward error for caller to handle
+      throw err
+    }
+  },
   
  
 }

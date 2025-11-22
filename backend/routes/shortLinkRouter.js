@@ -9,8 +9,32 @@ const nanoid = customAlphabet('0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLM
 // Create short link
 router.post('/create', async (req, res) => {
   try {
-    const { longUrl, userId } = req.body || {};
+    const { longUrl, customCode } = req.body || {};
     if (!longUrl) return res.status(400).json({ error: 'longUrl is required' });
+
+    // use authenticated user id
+    const userId = req.user && req.user.id;
+    if (!userId) return res.status(401).json({ error: 'Authentication required' });
+
+    // If a customCode is provided, validate it
+    const codePattern = /^[0-9A-Za-z_-]{3,20}$/;
+    if (customCode && !codePattern.test(customCode)) {
+      return res.status(400).json({ error: 'Invalid custom code format' });
+    }
+
+    // If customCode provided, try to use it once (fail if already exists)
+    if (customCode) {
+      try {
+        const created = await linkQueries.createLink(userId, customCode, longUrl);
+        return res.status(201).json({ shortcode: created.shortcode, shortUrl: `${req.protocol}://${req.get('host')}/${created.shortcode}` });
+      } catch (err) {
+        if (err && err.code === '23505') {
+          return res.status(409).json({ error: 'Shortcode already taken' });
+        }
+        console.error('Create short error (customCode)', err);
+        return res.status(500).json({ error: 'Server error' });
+      }
+    }
 
     // generate unique shortcode, retry on conflict
     let shortcode;
@@ -18,7 +42,7 @@ router.post('/create', async (req, res) => {
     for (let i = 0; i < 5; i++) {
       shortcode = nanoid();
       try {
-        created = await linkQueries.createLink(req.user.id, shortcode, longUrl);
+        created = await linkQueries.createLink(userId, shortcode, longUrl);
         break;
       } catch (err) {
         // unique violation -> retry
@@ -106,6 +130,17 @@ router.get('/:shortcode', async (req, res) => {
   }
 });
 
+router.delete('/:shortcode', async (req, res) => {
+  try {
+    const { shortcode } = req.params;
+    const deleted = await linkQueries.deleteByShortcode(req.user.id, shortcode);
+    if (!deleted) return res.status(404).json({ error: 'Not found' });  
+    res.json({ message: 'Deleted' });
+  } catch (err) {
+    console.error('Delete short link error', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
 
 
 module.exports = router;

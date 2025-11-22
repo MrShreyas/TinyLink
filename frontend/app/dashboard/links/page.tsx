@@ -5,12 +5,14 @@ import { Button } from "@/components/ui/button"
 import { LinkModal } from "@/components/link-modal"
 import { LinkTable } from "@/components/link-table"
 import LinkServices from '@/services/linkServices'
+import { useToast } from '@/hooks/use-toast'
 
 export default function LinksPage() {
   const [showModal, setShowModal] = useState(false)
   const [links, setLinks] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const { toast } = useToast()
 
   const handleAddLink = async (longUrl: string, customCode?: string) => {
     try {
@@ -34,8 +36,19 @@ export default function LinksPage() {
       }
 
       setLinks((prev) => [created, ...prev])
+      setShowModal(false)
+      // show success toast with short URL
+      toast({
+        title: 'Short link created',
+        description: created.shortUrl || shortUrl || `${typeof window !== 'undefined' ? window.location.origin : ''}/${shortcode}`,
+      })
     } catch (err) {
       console.error('Create link failed', err)
+      toast({
+        title: 'Failed to create link',
+        description: (err as any)?.response?.data?.error || (err as any)?.message || 'Unknown error',
+        variant: 'destructive',
+      })
       throw err
     } finally {
     }
@@ -70,8 +83,16 @@ export default function LinksPage() {
     }
   }, [])
 
-  const handleDeleteLink = (code: string) => {
-    setLinks(links.filter((l) => l.code !== code))
+  const handleDeleteLink = async (code: string) => {
+    try {
+      await LinkServices.deleteLink(code)
+      setLinks(links.filter((l) => l.code !== code))
+      toast({ title: 'Link deleted', description: `Shortcode ${code} removed` })
+    } catch (err) {
+      console.error('Delete failed', err)
+      toast({ title: 'Failed to delete', description: (err as any)?.response?.data?.error || (err as any)?.message || 'Unknown error', variant: 'destructive' })
+      throw err
+    }
   }
 
   return (

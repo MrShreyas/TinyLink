@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card } from "@/components/ui/card"
 import AuthServices from "@/services/authServices"
+import { useToast } from '@/hooks/use-toast'
 
 export default function SignupPage() {
   const router = useRouter()
@@ -19,6 +20,7 @@ export default function SignupPage() {
   const [password, setPassword] = useState("")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
+  const { toast } = useToast()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -45,13 +47,17 @@ export default function SignupPage() {
       const res = await AuthServices.register({ firstName, lastName, email, password })
       if (!res) {
         setError("Registration failed")
+        toast({ title: 'Signup failed', description: 'Registration failed', variant: 'destructive' })
         setLoading(false)
         return
       }
       setLoading(false)
+      toast({ title: 'Account created', description: 'Please sign in with your new account' })
       router.push("/login")
     } catch (error) {
-      setError("An error occurred during registration")
+      const msg = (error as any)?.response?.data?.error || (error as any)?.message || 'An error occurred during registration'
+      setError(String(msg))
+      toast({ title: 'Signup error', description: String(msg), variant: 'destructive' })
       setLoading(false)
     }
   }

@@ -1,8 +1,17 @@
 "use client"
 
+import { useState } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog"
 
 interface LinkItem {
   code: string
@@ -10,9 +19,13 @@ interface LinkItem {
   clicks: number
   lastClicked: string
   created: string
+  shortUrl?: string
 }
 
 export function LinkTable({ links, onDelete }: { links: LinkItem[]; onDelete: (code: string) => void }) {
+  const [selected, setSelected] = useState<string | null>(null)
+  const [open, setOpen] = useState(false)
+  const [deleting, setDeleting] = useState(false)
   const truncate = (str: string, len = 40) => {
     return str.length > len ? str.substring(0, len) + "..." : str
   }
@@ -106,8 +119,11 @@ export function LinkTable({ links, onDelete }: { links: LinkItem[]; onDelete: (c
                   </Link>
                   <Button
                     size="sm"
-                    onClick={() => onDelete(link.code)}
-                    className="bg-danger/10 text-danger hover:bg-danger/20"
+                    onClick={() => {
+                      setSelected(link.code)
+                      setOpen(true)
+                    }}
+                    className="bg-danger/10 text-danger hover:bg-danger/20 shrink-0"
                   >
                     Delete
                   </Button>
@@ -117,6 +133,37 @@ export function LinkTable({ links, onDelete }: { links: LinkItem[]; onDelete: (c
           </tbody>
         </table>
       </div>
+
+      <Dialog  open={open} onOpenChange={(val) => { if (!val) { setSelected(null); setDeleting(false) } setOpen(val) }}>
+        <DialogContent className="bg-amber-50">
+          <DialogHeader>
+            <DialogTitle className="text-(--color-danger-hex)" >Delete link</DialogTitle>
+            <DialogDescription >Are you sure you want to delete this short link? This action cannot be undone and will remove associated statistics.</DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setOpen(false)} disabled={deleting}>Cancel</Button>
+            <Button
+              className="bg-(--color-danger-hex)/10 text-(--color-danger-hex) hover:bg-(--color-danger-hex)/20"
+              onClick={async () => {
+                if (!selected) return
+                try {
+                  setDeleting(true)
+                  await onDelete(selected)
+                  setOpen(false)
+                } catch (e) {
+                  console.error('Delete failed', e)
+                } finally {
+                  setDeleting(false)
+                  setSelected(null)
+                }
+              }}
+              disabled={deleting}
+            >
+              {deleting ? 'Deleting...' : 'Delete'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <div className="md:hidden divide-y divide-border">
         {links.map((link) => (
@@ -130,8 +177,11 @@ export function LinkTable({ links, onDelete }: { links: LinkItem[]; onDelete: (c
               </div>
               <Button
                 size="sm"
-                onClick={() => onDelete(link.code)}
-                className="bg-danger/10 text-danger hover:bg-danger/20 flex-shrink-0"
+                onClick={() => {
+                  setSelected(link.code)
+                  setOpen(true)
+                }}
+                className="bg-danger/10 text-danger hover:bg-danger/20 shrink-0"
               >
                 Delete
               </Button>

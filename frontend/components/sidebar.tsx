@@ -4,15 +4,28 @@ import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { useSidebar } from "@/components/ui/sidebar"
 import AuthServices from "@/services/authServices"
+import { useToast } from '@/hooks/use-toast'
 
 export function Sidebar() {
   const pathname = usePathname()
   const router = useRouter()
   const { open, setOpen } = useSidebar()
 
-  const handleLogout = () => {
-    AuthServices.logout()
-    router.push("/")
+  const { toast } = useToast()
+
+  const handleLogout = async () => {
+    try {
+      await AuthServices.logout()
+      // clear local client state
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('userId')
+      }
+      toast({ title: 'Signed out', description: 'You have been logged out' })
+      router.push("/")
+    } catch (err) {
+      console.error('Logout failed', err)
+      toast({ title: 'Logout failed', description: (err as any)?.response?.data?.error || (err as any)?.message || 'Could not logout', variant: 'destructive' })
+    }
   }
 
   const handleNavigation = () => {

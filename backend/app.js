@@ -46,12 +46,16 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.static(path.join(__dirname, 'public')));
 
+app.use('/healthz', (req, res) => {
+  res.status(200).json({ "ok": true, "version": "1.0" });
+});
+
 app.get('/:shortcode', async function(req, res, next) {
   try {
     const sc = req.params.shortcode;
     if (!sc) return next();
     const link = await linkQueries.findByShortcode(sc);
-    if (!link) return next();
+    if (!link) return res.status(404).send('Link not found');
 
     // increment clicks (non-blocking)
     linkQueries.incrementClicks(sc).catch(err => console.error('Increment clicks error', err));

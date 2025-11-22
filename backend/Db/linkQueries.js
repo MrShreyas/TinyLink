@@ -24,11 +24,6 @@ async function incrementClicks(shortcode) {
   return res.rows[0] || null;
 }
 
-async function findAllShortLinks() {
-  const res = await db.query('SELECT shortcode, target_url, total_clicks, last_clicked FROM links ORDER BY created_at DESC');
-  return res.rows;
-}
-
 async function findByUserId(userId) {
   const res = await db.query('SELECT shortcode, target_url, total_clicks, last_clicked FROM links WHERE user_id = $1 ORDER BY created_at DESC', [userId]);
   return res.rows;
@@ -82,11 +77,46 @@ async function getStatsForShortcode(shortcode, days = 7) {
   };
 }
 
+async function deleteByShortcode(userId, shortcode) {
+  // Use a transaction so we remove the link and all related statistics atomically.
+  const client = await db.pool.connect();
+  try {
+    await client.query('BEGIN');
+
+    const delRes = await client.query(
+      `DELETE FROM links WHERE user_id = $1 AND shortcode = $2 RETURNING id`,
+      [userId, shortcode]
+    );
+
+    const row = delRes.rows[0] || null;
+    if (!row) {
+      await client.query('ROLLBACK');
+      return null;
+    }
+
+    const linkId = row.id;
+
+    // Delete related statistics records for this link
+    await client.query('DELETE FROM stats_daily_clicks WHERE link_id = $1', [linkId]);
+    await client.query('DELETE FROM stats_referrers WHERE link_id = $1', [linkId]);
+    await client.query('DELETE FROM stats_locations WHERE link_id = $1', [linkId]);
+    await client.query('DELETE FROM stats_devices WHERE link_id = $1', [linkId]);
+
+    await client.query('COMMIT');
+    return row;
+  } catch (err) {
+    await client.query('ROLLBACK');
+    throw err;
+  } finally {
+    client.release();
+  }
+}
+
 module.exports = {
   findByShortcode,
   createLink,
   incrementClicks,
-  findAllShortLinks,
   findByUserId,
   getStatsForShortcode,
+  deleteByShortcode,
 };
