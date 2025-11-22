@@ -1,3 +1,4 @@
+import axios from 'axios'
 import api from '../lib/axios'
 
 type LoginPayload = {
@@ -15,6 +16,9 @@ type RegisterPayload = {
 const AuthServices = {
   login: async (payload: LoginPayload) => {
     const res = await api.post('/auth/login', payload)
+    if(res.data.token){
+      axios.post('/api/login', { token: res.data.token })
+    }
     return res.data
   },
 
@@ -25,7 +29,9 @@ const AuthServices = {
 
   logout: async () => {
     try {
-      return await api.post('/auth/logout')
+      await api.post('/auth/logout')
+      return axios.post('/api/logout')
+
     } catch (err) {
       throw err
     }
