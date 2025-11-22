@@ -1,0 +1,11 @@
+
+# Ignore top-level node_modules and .env
+node_modules/
+.env
+# Ignore node_modules and .env anywhere (frontend/backend and nested folders)
+**/node_modules/
+**/.env
+
+**/node_modules
+frontend/.next
+
