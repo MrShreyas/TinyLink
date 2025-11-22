@@ -51,7 +51,8 @@ router.post('/login', async (req, res) => {
       sameSite: 'none',
       secure: true,
       path: '/',
-      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+      domain:'tiny-link-eight-eta.vercel.app'
     });
     req.userId = user.id;
 
