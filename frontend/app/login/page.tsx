@@ -35,15 +35,12 @@ export default function LoginPage() {
     setLoading(true)
     try {
       const res = await AuthServices.login({ email, password })
-      console.log(res)
       if (!res) {
         setError("Invalid email or password")
         setLoading(false)
         return
       }
       localStorage.setItem("userId", res.user.id)
-      console.log("User ID stored:", res.user.id)
-      console.log(localStorage.getItem("userId"))
       setLoading(false)
       router.push("/dashboard")
     } catch (error) {
