@@ -38,6 +38,8 @@ app.use(cors({
     }
     return callback(new Error('CORS policy: Origin not allowed'));
   },
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization' ],
   credentials: true,
   optionsSuccessStatus: 200
 }));
