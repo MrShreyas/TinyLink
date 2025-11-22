@@ -17,7 +17,7 @@ const AuthServices = {
   login: async (payload: LoginPayload) => {
     const res = await api.post('/auth/login', payload)
     if(res.data.user.token){
-      axios.post('/api/login', { token: res.data.token })
+      await axios.post('/api/login', { token: res.data.user.token })
     }
     return res.data
   },
