@@ -3,7 +3,7 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
-var authRouter = require('./routes/authrouter');
+var authRouter = require('./routes/authRouter');
 var shortLinkRouter = require('./routes/shortLinkRouter');
 var cors = require('cors');
 require('dotenv').config();
