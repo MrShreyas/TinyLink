@@ -32,7 +32,7 @@ export function middleware(req: NextRequest) {
     return NextResponse.redirect(url)
   }
 
-  if (hasAuth && (pathname === '/login' || pathname === '/signup')) {
+  if (hasAuth && (pathname === '/login' || pathname === '/signup'|| pathname === '/')) {
     // Authenticated and trying to access login/signup -> send to dashboard
     const url = new URL('/dashboard', req.url)
     return NextResponse.redirect(url)
