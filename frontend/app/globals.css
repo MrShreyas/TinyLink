@@ -48,33 +48,46 @@
 }
 
 .dark {
-  --background: #2a2a2a;
-  --foreground: #f6f5ae;
-  --card: #3a3a3a;
-  --card-foreground: #f6f5ae;
-  --popover: #3a3a3a;
-  --popover-foreground: #f6f5ae;
-  --primary: #2e86ab;
-  --primary-foreground: #f6f5ae;
-  --secondary: #f5f749;
-  --secondary-foreground: #564138;
-  --muted: #555555;
-  --muted-foreground: #aaaaaa;
-  --accent: #f5f749;
-  --accent-foreground: #564138;
-  --destructive: #f24236;
+  --background: #1b1b1f; /* Deep neutral */
+  --foreground: #e6e4ff; /* Light lavender matching the indigo tone */
+
+  --card: #23232a;
+  --card-foreground: #e6e4ff;
+
+  --popover: #23232a;
+  --popover-foreground: #e6e4ff;
+
+  --primary: #52489c; /* Your color */
+  --primary-foreground: #f4f3ff;
+
+  --secondary: #6c63c5; /* Softer variant of primary */
+  --secondary-foreground: #ffffff;
+
+  --muted: #2a2a33;
+  --muted-foreground: #b3b1d6;
+
+  --accent: #6c63c5; /* Indigo-accent */
+  --accent-foreground: #ffffff;
+
+  --destructive: #ff4d4f;
   --destructive-foreground: #ffffff;
-  --border: #555555;
-  --input: #3a3a3a;
-  --ring: #2e86ab;
-  --sidebar: #2a2a2a;
-  --sidebar-foreground: #f6f5ae;
-  --sidebar-primary: #2e86ab;
-  --sidebar-primary-foreground: #f6f5ae;
-  --sidebar-accent: #f5f749;
-  --sidebar-accent-foreground: #564138;
-  --sidebar-border: #555555;
-  --sidebar-ring: #2e86ab;
+
+  --border: #2f2f39;
+  --input: #23232a;
+
+  --ring: #52489c;
+
+  --sidebar: #18181b;
+  --sidebar-foreground: #e6e4ff;
+
+  --sidebar-primary: #52489c;
+  --sidebar-primary-foreground: #ffffff;
+
+  --sidebar-accent: #6c63c5;
+  --sidebar-accent-foreground: #ffffff;
+
+  --sidebar-border: #2f2f39;
+  --sidebar-ring: #52489c;
 }
 
 @theme inline {

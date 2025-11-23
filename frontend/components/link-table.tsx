@@ -12,6 +12,8 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog"
+import { useToast } from "@/hooks/use-toast"
+
 
 interface LinkItem {
   code: string
@@ -26,6 +28,7 @@ export function LinkTable({ links, onDelete }: { links: LinkItem[]; onDelete: (c
   const [selected, setSelected] = useState<string | null>(null)
   const [open, setOpen] = useState(false)
   const [deleting, setDeleting] = useState(false)
+  const {toast} = useToast()
   const truncate = (str: string, len = 40) => {
     return str.length > len ? str.substring(0, len) + "..." : str
   }
@@ -53,7 +56,7 @@ export function LinkTable({ links, onDelete }: { links: LinkItem[]; onDelete: (c
       <div className="hidden md:block overflow-x-auto">
         <table className="w-full">
           <thead>
-            <tr className="border-b border-border bg-background">
+            <tr className="border-b border-border">
               <th className="px-6 py-4 text-left text-sm font-semibold text-foreground">Short Code</th>
               <th className="px-6 py-4 text-left text-sm font-semibold text-foreground">Short URL</th>
               <th className="px-6 py-4 text-left text-sm font-semibold text-foreground">Target URL</th>
@@ -81,13 +84,30 @@ export function LinkTable({ links, onDelete }: { links: LinkItem[]; onDelete: (c
                   >
                     {link.shortUrl ? link.shortUrl : `${window.location.origin}/${link.code}`}
                   </a>
-                  <button
-                    onClick={() => copy(link.shortUrl || `${window.location.origin}/${link.code}`)}
-                    className="ml-2 text-xs text-foreground/70 hover:text-foreground"
+                    <button
+                    onClick={async () => {
+                      await copy(link.shortUrl || `${window.location.origin}/${link.code}`);
+                      // Show a toast message on successful copy
+                        toast({ title: 'Success', description: 'Copied to clipboard' });
+                    }}
+                    className="ml-2 p-1 cursor-pointer rounded bg-background text-foreground/70 hover:text-foreground"
                     title="Copy short URL"
-                  >
-                    Copy
-                  </button>
+                    >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth={1.5}
+                      stroke="currentColor"
+                      className="w-4 h-4"
+                    >
+                      <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M8.25 15.75v1.5A2.25 2.25 0 0010.5 19.5h9a2.25 2.25 0 002.25-2.25v-9A2.25 2.25 0 0019.5 6h-1.5m-11.25 9H6A2.25 2.25 0 013.75 12V3.75A2.25 2.25 0 016 1.5h9A2.25 2.25 0 0117.25 3.75V6m-9 9l9-9"
+                      />
+                    </svg>
+                    </button>
                 </td>
 
                 <td className="px-6 py-4">
@@ -105,7 +125,16 @@ export function LinkTable({ links, onDelete }: { links: LinkItem[]; onDelete: (c
                   <span className="text-sm font-semibold text-wood">{link.clicks}</span>
                 </td>
                 <td className="px-6 py-4">
-                  <span className="text-sm text-foreground/70">{link.lastClicked}</span>
+                    <span className="text-sm text-foreground/70">
+                    {new Date(link.lastClicked).toLocaleString(undefined, {
+                      weekday: 'long',
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}
+                    </span>
                 </td>
                 <td className="px-6 py-4 flex gap-2">
                   <Link href={`/code/${link.code}`}>
