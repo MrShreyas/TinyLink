@@ -25,7 +25,33 @@ export function middleware(req: NextRequest) {
 
   const isPublicPath = PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith(p + '/'))
 
-  if (!hasAuth && !isPublicPath) {
+  // Treat root-level shortcodes (e.g. `/abc123`) as public if they are a
+  // single segment matching the allowed shortcode pattern and not one of the
+  // reserved top-level routes (login, signup, dashboard, api, etc.). This
+  // lets the public shortlink redirect (`/:code`) bypass auth middleware.
+  const pathParts = pathname.split('/').filter(Boolean)
+  const RESERVED_TOP_LEVEL = new Set([
+    'login',
+    'signup',
+    'dashboard',
+    'api',
+    'auth',
+    'short',
+    'favicon.ico',
+  ])
+
+  let isShortcodePath = false
+  if (pathParts.length === 1) {
+    const seg = pathParts[0]
+    // allow 3-20 chars: letters, numbers, hyphen and underscore
+    if (!RESERVED_TOP_LEVEL.has(seg) && /^[0-9A-Za-z_-]{3,20}$/.test(seg)) {
+      isShortcodePath = true
+    }
+  }
+
+  const finalIsPublic = isPublicPath || isShortcodePath
+
+  if (!hasAuth && !finalIsPublic) {
     // Not authenticated and requesting a protected page -> redirect to login
     const url = new URL('/login', req.url)
     url.searchParams.set('from', pathname)
