@@ -7,7 +7,7 @@ const router = express.Router();
 const nanoid = customAlphabet('0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ', 7);
 
 // Create short link
-router.post('/create', async (req, res) => {
+router.post('/', async (req, res) => {
   try {
     const { longUrl, customCode } = req.body || {};
     if (!longUrl) return res.status(400).json({ error: 'longUrl is required' });
@@ -61,7 +61,7 @@ router.post('/create', async (req, res) => {
 });
 
 // Get all short links (no statistics)
-router.get('/all', async (req, res) => {
+router.get('/', async (req, res) => {
   try {
     // Require authentication: route should be protected by middleware, but double-check
     if (!req.user || !req.user.id) return res.status(401).json({ error: 'Authentication required' });
@@ -88,12 +88,12 @@ router.get('/all', async (req, res) => {
 
 // Get metadata for a shortcode
 // Get metadata + statistics for a shortcode
-router.get('/:shortcode', async (req, res) => {
+router.get('/:code', async (req, res) => {
   try {
-    const { shortcode } = req.params;
+    const { code } = req.params;
     const days = parseInt(req.query.days, 10) || 7;
 
-    const data = await linkQueries.getStatsForShortcode(shortcode, days);
+    const data = await linkQueries.getStatsForShortcode(code, days);
     if (!data) return res.status(404).json({ error: 'Not found' });
 
     // Normalize daily trend: ensure entries for each day in range
@@ -130,10 +130,10 @@ router.get('/:shortcode', async (req, res) => {
   }
 });
 
-router.delete('/:shortcode', async (req, res) => {
+router.delete('/:code', async (req, res) => {
   try {
-    const { shortcode } = req.params;
-    const deleted = await linkQueries.deleteByShortcode(req.user.id, shortcode);
+    const { code } = req.params;
+    const deleted = await linkQueries.deleteByShortcode(req.user.id, code);
     if (!deleted) return res.status(404).json({ error: 'Not found' });  
     res.json({ message: 'Deleted' });
   } catch (err) {

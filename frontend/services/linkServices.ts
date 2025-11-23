@@ -34,20 +34,20 @@ type LinkStats = {
 const LinkServices = {
   // POST /short/create
   createLink: async (payload: CreateLinkPayload) => {
-    const res = await api.post('/short/create', payload)
+    const res = await api.post('/api/links', payload)
     return res.data
   },
 
   // GET /short/:shortcode  -> returns metadata (+ stats)
   getMetadata: async (shortcode: string, days = 7): Promise<any | null> => {
-    const res = await api.get(`/short/${encodeURIComponent(shortcode)}?days=${days}`)
+    const res = await api.get(`/api/links/${encodeURIComponent(shortcode)}?days=${days}`)
     return res.data || null
   },
 
   // GET /short/:shortcode -> returns metadata and stats
   getStats: async (shortcode: string, days = 7): Promise<LinkStats | null> => {
     try {
-      const res = await api.get(`/short/${encodeURIComponent(shortcode)}?days=${days}`)
+      const res = await api.get(`/api/links/${encodeURIComponent(shortcode)}?days=${days}`)
       const data = res.data
       if (!data) return null
 
@@ -82,7 +82,7 @@ const LinkServices = {
 
   // GET /short/all -> return all short links (no stats)
   getAll: async (): Promise<any[]> => {
-    const res = await api.get('/short/all')
+    const res = await api.get('/api/links')
     // normalize common shapes
     const data = res.data
     if (Array.isArray(data)) return data
@@ -93,7 +93,7 @@ const LinkServices = {
   // DELETE /short/:shortcode -> delete a short link
   deleteLink: async (shortcode: string): Promise<boolean> => {
     try {
-      await api.delete(`/short/${encodeURIComponent(shortcode)}`)
+      await api.delete(`/api/links/${encodeURIComponent(shortcode)}`)
       return true
     } catch (err) {
       // forward error for caller to handle
