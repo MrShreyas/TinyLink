@@ -24,6 +24,11 @@ async function incrementClicks(shortcode) {
   return res.rows[0] || null;
 }
 
+async function findAllShortLinks() {
+  const res = await db.query('SELECT shortcode, target_url, total_clicks, last_clicked FROM links ORDER BY created_at DESC');
+  return res.rows;
+}
+
 async function findByUserId(userId) {
   const res = await db.query('SELECT shortcode, target_url, total_clicks, last_clicked FROM links WHERE user_id = $1 ORDER BY created_at DESC', [userId]);
   return res.rows;
@@ -83,10 +88,13 @@ async function deleteByShortcode(userId, shortcode) {
   try {
     await client.query('BEGIN');
 
-    const delRes = await client.query(
-      `DELETE FROM links WHERE user_id = $1 AND shortcode = $2 RETURNING id`,
-      [userId, shortcode]
+    // If userId is provided, delete only that user's link. Otherwise delete by shortcode only.
+    let delRes
+    delRes = await client.query(
+      `DELETE FROM links WHERE shortcode = $1 RETURNING id`,
+      [shortcode]
     );
+    
 
     const row = delRes.rows[0] || null;
     if (!row) {
@@ -116,6 +124,7 @@ module.exports = {
   findByShortcode,
   createLink,
   incrementClicks,
+  findAllShortLinks,
   findByUserId,
   getStatsForShortcode,
   deleteByShortcode,

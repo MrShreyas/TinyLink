@@ -29,13 +29,13 @@ async function main() {
     -- LINKS TABLE
     -----------------------------------------------------
     CREATE TABLE IF NOT EXISTS links (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-        shortcode VARCHAR(12) UNIQUE NOT NULL,
-        target_url TEXT NOT NULL,
-        total_clicks INTEGER DEFAULT 0,
-        last_clicked TIMESTAMP WITH TIME ZONE,
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+      shortcode VARCHAR(12) UNIQUE NOT NULL,
+      target_url TEXT NOT NULL,
+      total_clicks INTEGER DEFAULT 0,
+      last_clicked TIMESTAMP WITH TIME ZONE,
+      created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
     );
 
     CREATE INDEX IF NOT EXISTS idx_links_user_id ON links(user_id);
@@ -100,6 +100,10 @@ async function main() {
     `;
 
     await client.query(schema);
+
+    // Ensure existing installations allow anonymous links by making user_id nullable.
+    // This is idempotent: if the column is already nullable this will have no effect.
+    await client.query(`ALTER TABLE links ALTER COLUMN user_id DROP NOT NULL`);
     await client.query('COMMIT');
     console.log('DB seed completed successfully.');
   } catch (err) {

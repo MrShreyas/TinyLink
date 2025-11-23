@@ -86,7 +86,6 @@ app.get('/:shortcode', async function(req, res, next) {
 
 app.use('/auth', authRouter);
 // Protect the short create endpoint: POST /short/create requires auth
-app.use('/api/links', verifyAuth);
 app.use('/api/links', shortLinkRouter);
 
 // Redirect handler for shortcodes at root: /:shortcode -> 302 to target_url

@@ -9,12 +9,11 @@ const nanoid = customAlphabet('0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLM
 // Create short link
 router.post('/', async (req, res) => {
   try {
-    const { longUrl, customCode } = req.body || {};
+    const { longUrl, customCode, userId: bodyUserId } = req.body || {};
     if (!longUrl) return res.status(400).json({ error: 'longUrl is required' });
 
-    // use authenticated user id
-    const userId = req.user && req.user.id;
-    if (!userId) return res.status(401).json({ error: 'Authentication required' });
+    // Use provided body userId if present, otherwise use authenticated user id if available.
+    const userId = bodyUserId || (req.user && req.user.id) || null;
 
     // If a customCode is provided, validate it
     const codePattern = /^[0-9A-Za-z_-]{3,20}$/;
@@ -63,15 +62,22 @@ router.post('/', async (req, res) => {
 // Get all short links (no statistics)
 router.get('/', async (req, res) => {
   try {
-    // Require authentication: route should be protected by middleware, but double-check
-    if (!req.user || !req.user.id) return res.status(401).json({ error: 'Authentication required' });
+    // If authenticated, return that user's links. Otherwise allow optional query param `userId`.
+    const queryUserId = req.query.userId;
+    const authUserId = req.user && req.user.id;
+    let rows;
 
-    const result = await linkQueries.findByUserId(req.user.id);
-    let rows = Array.isArray(result) ? result : (result && result.rows) || result;
+    if (authUserId) {
+      rows = await linkQueries.findByUserId(authUserId);
+    } else if (queryUserId) {
+      rows = await linkQueries.findByUserId(queryUserId);
+    } else {
+      rows = await linkQueries.findAllShortLinks();
+    }
 
     const host = req.get('host');
     const proto = req.protocol;
-    const mapped = rows.map(r => ({
+    const mapped = (rows || []).map(r => ({
       shortcode: r.shortcode,
       shortUrl: `${proto}://${host}/${r.shortcode}`,
       target_url: r.target_url,
@@ -133,8 +139,13 @@ router.get('/:code', async (req, res) => {
 router.delete('/:code', async (req, res) => {
   try {
     const { code } = req.params;
-    const deleted = await linkQueries.deleteByShortcode(req.user.id, code);
-    if (!deleted) return res.status(404).json({ error: 'Not found' });  
+    console.log('DELETE /api/links/:code called. code=', code, 'user=', req.user && req.user.id);
+    const deleted = await linkQueries.deleteByShortcode(req.user && req.user.id, code);
+    if (!deleted) {
+      console.warn('Delete returned no rows for shortcode', code);
+      return res.status(404).json({ error: 'Not found' });
+    }
+    console.log('Deleted link id=', deleted.id, 'shortcode=', code);
     res.json({ message: 'Deleted' });
   } catch (err) {
     console.error('Delete short link error', err);

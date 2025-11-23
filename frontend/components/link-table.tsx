@@ -108,7 +108,7 @@ export function LinkTable({ links, onDelete }: { links: LinkItem[]; onDelete: (c
                   <span className="text-sm text-foreground/70">{link.lastClicked}</span>
                 </td>
                 <td className="px-6 py-4 flex gap-2">
-                  <Link href={`/dashboard/links/${link.code}`}>
+                  <Link href={`/code/${link.code}`}>
                     <Button
                       size="sm"
                       variant="outline"
